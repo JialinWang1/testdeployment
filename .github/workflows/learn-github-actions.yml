@@ -45,4 +45,4 @@ jobs:
           echo "StrictHostKeyChecking no" > ~/.ssh/config
 
       - name: Transfer files via SCP
-        run: scp -P 29146 -r builds/build.tar.gz root@95.169.25.107:/projects2
+        run: scp -P 29146 -r builds/build.tar.gz root@95.169.25.107:~/projects2
