@@ -10,14 +10,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
+
       - name: Install Dependencies
         run: npm install
-        
+
       - name: Build and Package
         run: |
-         npm run build
-         tar -czvf build.tar.gz build/
+          npm run build
+          tar -czvf build.tar.gz build/
 
       - name: Upload Build
         uses: actions/upload-artifact@v3
@@ -39,7 +39,7 @@ jobs:
           scp -r -p 29146 builds/build.tar.gz root@95.169.25.107:/projects
 
       - name: Set up Docker
-        uses: docker/setup-docker@v3
+        uses: docker/setup-docker@v2
 
       - name: Build and push Docker image
         run: |
