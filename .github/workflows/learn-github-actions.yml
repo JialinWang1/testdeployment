@@ -39,7 +39,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -t rsa remote_host >> ~/.ssh/known_hosts
+          ssh-keyscan -p 29146 -t rsa 95.169.25.107 >> ~/.ssh/known_hosts
 
       - name: Transfer files via SCP
         run: scp -r builds/build.tar.gz root@95.169.25.107:/projects -P 29146
