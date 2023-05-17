@@ -5,22 +5,54 @@ on:
     branches:
       - main
 jobs:
-  build:
+  flow-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Run Flow
+        run: |
+          git fetch --unshallow
+          if git diff --name-only ${{ github.sha }} ${{ github.sha }}^ | grep -qE '\.js$'; then
+            npm install
+            npm run 
+            flowflowStatus=$?
+            if [ $flowStatus -ne 0 ]; then
+              echo "Flow check failed. Exiting..."
+              exit 1
+            fi
+          else
+            echo "No JavaScript files changed. Skipping Flow check."
+              exit 1
+          fi
+
+  build:
+    needs: flow-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: npm install
+
       - name: Build and Package
         run: |
-         npm run build
-         tar -czvf build.tar.gz build/
+          npm run build
+          tar -czvf build.tar.gz build/
 
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
           name: build-artifact
-          path: build/build.tar.gz
+          path: build.tar.gz
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -31,22 +63,26 @@ jobs:
           name: build-artifact
           path: builds
 
-      - name: Deploy to Server
-        run: |
-          scp -r -p 29146 builds/build.tar.gz root@95.169.25.107:/projects
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SERVER_PRIVATE }}
 
-      - name: Set up Docker
-        uses: docker/setup-docker@v3
-
-      - name: Build and push Docker image
+      - name: Disable host key checking
         run: |
-          docker build -t your-docker-image:latest .
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker tag your-docker-image:latest your-docker-registry/repository:latest
-          docker push your-docker-registry/repository:latest
+          mkdir -p ~/.ssh
+          echo "StrictHostKeyChecking no" > ~/.ssh/config
 
-      - name: SSH into remote server and deploy
-        run: |
-          ssh user@your-remote-server 'docker stop your-nginx_on_8443 || true'
-          ssh user@your-remote-server 'docker pull your-docker-registry/repository:latest'
-          ssh user@your-remote-server 'docker run -it --rm --net=host --name nginx_on_8443 --mount type=bind,source="$(pwd)"/build,target=/usr/share/nginx/html --mount type=bind,source="$(pwd)"/NginxConf,target=/etc/nginx --mount type=bind,source="$(pwd)"/resource/,target=/usr/share/nginx/resource -d nginx_8888'
+      - name: Transfer files via SCP
+        run: scp -P 29146 -r builds/build.tar.gz root@95.169.25.107:~/projects
+
+      - name: Update build file
+        run: ssh -p 29146 root@95.169.25.107 '
+          cd ~/projects &&
+          mkdir temp_build &&
+          tar -zxvf build.tar.gz -C temp_build --strip-components=1 &&
+          rsync -av --delete temp_build/ build/ &&
+          rm -r temp_build
+          '
+      - name: restart docker-nginx on 8443
+        run: ssh -p 29146 root@95.169.25.107 'docker restart nginx_on_8443'
