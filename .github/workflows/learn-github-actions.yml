@@ -18,6 +18,7 @@ jobs:
         run: |
           npm run build
           tar -czvf build.tar.gz build/
+          ls -l .
 
       - name: Upload Build
         uses: actions/upload-artifact@v3
