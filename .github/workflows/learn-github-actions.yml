@@ -41,5 +41,3 @@ jobs:
 
       - name: Transfer files via SCP
         run: scp -P 29146 -r builds/build.tar.gz root@95.169.25.107:/projects
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SERVER_PRIVATE }}
