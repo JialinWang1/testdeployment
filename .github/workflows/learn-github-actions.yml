@@ -38,18 +38,3 @@ jobs:
         run: |
           scp -r -p 29146 builds/build.tar.gz root@95.169.25.107:/projects
 
-      - name: Set up Docker
-        uses: docker/setup-docker@v2
-
-      - name: Build and push Docker image
-        run: |
-          docker build -t your-docker-image:latest .
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker tag your-docker-image:latest your-docker-registry/repository:latest
-          docker push your-docker-registry/repository:latest
-
-      - name: SSH into remote server and deploy
-        run: |
-          ssh user@your-remote-server 'docker stop your-nginx_on_8443 || true'
-          ssh user@your-remote-server 'docker pull your-docker-registry/repository:latest'
-          ssh user@your-remote-server 'docker run -it --rm --net=host --name nginx_on_8443 --mount type=bind,source="$(pwd)"/build,target=/usr/share/nginx/html --mount type=bind,source="$(pwd)"/NginxConf,target=/etc/nginx --mount type=bind,source="$(pwd)"/resource/,target=/usr/share/nginx/resource -d nginx_8888'
