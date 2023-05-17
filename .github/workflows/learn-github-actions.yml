@@ -37,6 +37,6 @@ jobs:
       - name: Deploy to Server
         run: |
           ls builds/
-          scp -r builds/build.tar.gz root@95.169.25.107:/projects -P 29146 -o "PasswordAuthentication yes" <<< ${{ secrets.SERVER_PASSWORD }}
+          scp -r builds/build.tar.gz root@95.169.25.107:/projects -P 29146 -o "PasswordAuthentication=yes" <<< ${{ secrets.SERVER_PASSWORD }}
 
 
