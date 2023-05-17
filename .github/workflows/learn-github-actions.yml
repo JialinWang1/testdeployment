@@ -39,5 +39,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SERVER_PRIVATE }}
 
+      - name: Disable host key checking
+        run: |
+          mkdir -p ~/.ssh
+          echo "StrictHostKeyChecking no" > ~/.ssh/config
+
       - name: Transfer files via SCP
         run: scp -P 29146 -r builds/build.tar.gz root@95.169.25.107:/projects
