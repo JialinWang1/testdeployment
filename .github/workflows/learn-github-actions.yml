@@ -37,7 +37,7 @@ jobs:
       - name: Set up SSH
         run: |
           mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          echo "$SERVER_PRIVATE" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -p 29146 -t rsa 95.169.25.107 >> ~/.ssh/known_hosts
           cat ~/.ssh/id_rsa
