@@ -18,13 +18,12 @@ jobs:
         run: |
           npm run build
           tar -czvf build.tar.gz build/
-          ls -l build/
 
       - name: Upload Build
         uses: actions/upload-artifact@v3
         with:
           name: build-artifact
-          path: build/build.tar.gz
+          path: build.tar.gz
   deploy:
     needs: build
     runs-on: ubuntu-latest
