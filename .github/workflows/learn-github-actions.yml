@@ -46,3 +46,13 @@ jobs:
 
       - name: Transfer files via SCP
         run: scp -P 29146 -r builds/build.tar.gz root@95.169.25.107:~/projects
+      
+      - name: Update build file
+        run: ssh -p 29146 root@95.169.25.107 '
+          cd ~/projects && 
+          mkdir temp_build && 
+          tar -zxvf build.tar.gz -C temp_build && 
+          rsync -av --delete temp_build/ build/ && 
+          rm -r temp_build
+          ' 
+
