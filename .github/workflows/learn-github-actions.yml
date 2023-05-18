@@ -28,12 +28,11 @@ jobs:
             fi
           else
             echo "No JavaScript files changed. Skipping Flow check."
-            echo "::set-output name=skip_build::true"
+            exit 1
           fi
           
   build:
     needs: flow-check
-    if: needs.flow-check.outputs.skip_build != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -80,7 +79,7 @@ jobs:
         run: ssh -p 29146 root@95.169.25.107 '
           cd ~/projects && 
           mkdir temp_build && 
-          tar -zxvf build.tar.gz -C temp_build && 
+          tar -zxvf build.tar.gz -C temp_build --strip-components=1 && 
           rsync -av --delete temp_build/ build/ && 
           rm -r temp_build
           ' 
