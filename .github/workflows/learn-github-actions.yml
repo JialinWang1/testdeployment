@@ -28,11 +28,13 @@ jobs:
             fi
           else
             echo "No JavaScript files changed. Skipping Flow check."
-            exit 1
+            echo "skip_build=true" >> $GITHUB_ENV
+            echo "cancel_workflow=true" >> $GITHUB_ENV
           fi
           
   build:
     needs: flow-check
+    if: env.skip_build != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -54,6 +56,7 @@ jobs:
           
   deploy:
     needs: build
+    if: env.cancel_workflow != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Download Build
