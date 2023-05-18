@@ -15,6 +15,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 14
+
+      - name: Run Flow
+        run: |
+          if git diff --name-only ${{ github.sha }} ${{ github.sha }}^ | grep -qE '\.js$'; then
+            npm install
+            npm run flow
+          else
+            echo "No JavaScript files changed. Skipping Flow check."
+          fi
   build:
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +62,7 @@ jobs:
 
       - name: Transfer files via SCP
         run: scp -P 29146 -r builds/build.tar.gz root@95.169.25.107:~/projects
-      
+        
       - name: Update build file
         run: ssh -p 29146 root@95.169.25.107 '
           cd ~/projects && 
@@ -63,5 +72,5 @@ jobs:
           rm -r temp_build
           ' 
       - name: restart docker-nginx on 8443
-        run: 
+        run: ssh -p 29146 root@95.169.25.107 'docker restart nginx_on_8443'
 
