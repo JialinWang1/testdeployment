@@ -28,11 +28,12 @@ jobs:
             fi
           else
             echo "No JavaScript files changed. Skipping Flow check."
-            exit 0
+            echo "::set-output name=skip_build::true"
           fi
           
   build:
     needs: flow-check
+    if: needs.flow-check.outputs.skip_build != 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
