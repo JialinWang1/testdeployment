@@ -20,15 +20,26 @@ jobs:
         run: |
           if git diff --name-only ${{ github.sha }} ${{ github.sha }}^ | grep -qE '\.js$'; then
             npm install
-            npm run flow
+            npm run 
+            flowflowStatus=$?
+            if [ $flowStatus -ne 0 ]; then
+              echo "Flow check failed. Exiting..."
+              exit 1
+            fi
           else
             echo "No JavaScript files changed. Skipping Flow check."
+            exit 1
           fi
+          
   build:
+    needs: flow-check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: npm install
 
       - name: Build and Package
         run: |
@@ -40,6 +51,7 @@ jobs:
         with:
           name: build-artifact
           path: build.tar.gz
+          
   deploy:
     needs: build
     runs-on: ubuntu-latest
