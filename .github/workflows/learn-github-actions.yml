@@ -5,6 +5,25 @@ on:
     branches:
       - main
 jobs:
+  flow-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 14
+
+      - name: Run Flow
+        run: |
+          if git diff --name-only ${{ github.sha }} ${{ github.sha }}^ | grep -qE '\.js$'; then
+            npm install
+            npm run flow
+          else
+            echo "No JavaScript files changed. Skipping Flow check."
+          fi
   build:
     runs-on: ubuntu-latest
     steps:
@@ -55,4 +74,6 @@ jobs:
           rsync -av --delete temp_build/ build/ && 
           rm -r temp_build
           ' 
+      - name: restart docker-nginx on 8443
+        run: 
 
