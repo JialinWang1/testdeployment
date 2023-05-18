@@ -28,7 +28,7 @@ jobs:
             fi
           else
             echo "No JavaScript files changed. Skipping Flow check."
-            exit 1
+            exit 0
           fi
           
   build:
