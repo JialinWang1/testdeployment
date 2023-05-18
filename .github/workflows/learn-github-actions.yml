@@ -18,6 +18,7 @@ jobs:
 
       - name: Run Flow
         run: |
+          git fetch --unshallow
           if git diff --name-only ${{ github.sha }} ${{ github.sha }}^ | grep -qE '\.js$'; then
             npm install
             npm run 
