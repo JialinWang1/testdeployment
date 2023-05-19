@@ -1,0 +1,60 @@
+docker run -it --rm -dp 8081:80/tcp --name testnginx --mount type=bind,source="$(pwd)"/build,target=/usr/share/nginx/html nginx:latest
+
+                iptables -I INPUT -p tcp --dport 8081 -j ACCEPT
+
+
+docker run -it --rm --net=host --name nginx_on_8443 \
+--mount type=bind,source="$(pwd)"/build,target=/usr/share/nginx/html \
+--mount type=bind,source="$(pwd)"/NginxConf/nginx.conf,target=/etc/nginx/nginx.conf \
+nginx_8888 
+
+docker run -it --rm -d -p 8888:80/tcp --name test_nginx \
+--mount type=bind,source="$(pwd)"/build,target=/usr/share/nginx/html \
+--mount type=bind,source="$(pwd)"/to/nginx.conf,target=/etc/nginx/nginx.conf \
+nginx:latest
+
+docker run -d -p 80:80 -v /path/to/nginx.conf:/etc/nginx/nginx.conf nginx:latest -c /etc/nginx/nginx.conf
+
+
+user  nginx;
+worker_processes  auto;
+
+error_log  /var/log/nginx/error.log notice;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    server {
+        listen 8888;
+    }
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+}
+
+
+
+docker run -it --rm --net=host --name nginx_on_8443 \
+--mount type=bind,source="$(pwd)"/build,target=/usr/share/nginx/html \
+--mount type=bind,source="$(pwd)"/NginxConf,target=/etc/nginx \
+--mount type=bind,source="$(pwd)"/resource/,target=/usr/share/nginx/resource \
+nginx_8888
