@@ -31,7 +31,7 @@ jobs:
             echo "No JavaScript files changed. Skipping Flow check."
               exit 1
           fi
-
+          
   build:
     needs: flow-check
     runs-on: ubuntu-latest
@@ -52,7 +52,7 @@ jobs:
         with:
           name: build-artifact
           path: build.tar.gz
-
+          
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -84,5 +84,19 @@ jobs:
           rsync -av --delete temp_build/ build/ &&
           rm -r temp_build
           '
+      - name: restart docker-nginx on 8443
+        run: ssh -p 29146 root@95.169.25.107 'docker restart nginx_on_8443'
+       
+      - name: Transfer files via SCP
+        run: scp -P 29146 -r builds/build.tar.gz root@95.169.25.107:~/projects
+        
+      - name: Update build file
+        run: ssh -p 29146 root@95.169.25.107 '
+          cd ~/projects && 
+          mkdir temp_build && 
+          tar -zxvf build.tar.gz -C temp_build --strip-components=1 && 
+          rsync -av --delete temp_build/ build/ && 
+          rm -r temp_build
+          ' 
       - name: restart docker-nginx on 8443
         run: ssh -p 29146 root@95.169.25.107 'docker restart nginx_on_8443'
