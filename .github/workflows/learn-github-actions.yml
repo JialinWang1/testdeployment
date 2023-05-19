@@ -33,7 +33,6 @@ jobs:
           fi
 
   build:
-    needs: flow-check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
